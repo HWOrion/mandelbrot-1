@@ -1,2 +1,2 @@
 main:
-	gcc -lm -lmpfr -lgmp  main.c -o 'mandelbrot'
+	gcc -lmpfr -lgmp  mandelbrot.c -o 'mandelbrot'

@@ -5,6 +5,10 @@
 #include <string.h>
 #include <getopt.h>
 
+#define PHI 1.6
+#define EULER 1.7
+#define PI 3.141692
+
 unsigned char header [54] = {'B', 'M', 
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 54, 0x00, 0x00, 0x00, 40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 24, 0x00, 
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x13, 0x0B, 0x00, 0x00, 0x13, 0x0B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -46,6 +50,7 @@ int mandelbrot ();
 int multibrot ();
 int julia ();
 int parse (int argc, char* argv[]);
+float parse_number(char * string);
 int write_int();
 int write_row();
 
@@ -112,6 +117,8 @@ int color_pixel (int pixel, int i, float f)
 
 int mandelbrot ()
 {
+
+	mpfr_set(imag, y_min, MPFR_RNDN);
 	while (y < height){
 		x = 0;
 		mpfr_set(real, x_min, MPFR_RNDN);
@@ -228,12 +235,12 @@ int parse (int argc, char* argv[])
 				break;
 		      
 			case 'i':
-				argument = atof(optarg);
+				argument = parse_number(optarg);
 				mpfr_set_flt(imag, argument, MPFR_RNDN);
 				break;
 					  						  
 			case 'r':
-				argument = atof(optarg);
+				argument = parse_number(optarg);
 				mpfr_set_flt(real, argument, MPFR_RNDN);
 				break;
 
@@ -243,17 +250,17 @@ int parse (int argc, char* argv[])
 				break;
 
 			case 'x':
-				argument = atof(optarg);
+				argument = parse_number(optarg);
 				mpfr_set_flt(x_min, argument, MPFR_RNDN);
 				break;
 
 			case 'y':
-				argument = atof(optarg);
+				argument = parse_number(optarg);
 				mpfr_set_flt(y_min, argument, MPFR_RNDN);
 				break;
 
 			case 'e':
-				argument = atof(optarg);
+				argument = parse_number(optarg);
 				if (mndl == 1 && argument != 2.0)
 					{mndl = 2;}
 				mpfr_set_flt(exponent, argument, MPFR_RNDN);
@@ -290,17 +297,20 @@ int parse (int argc, char* argv[])
 	mpfr_printf("at x = %Rf y = %Rf (zoom: %Rf), ", x_min, y_min, zoom);
         printf("on %dpx X %dpx image with %d iterations.\n", width, height, iterations);
 
-	mpfr_ui_div(zoom, 4, zoom, MPFR_RNDN);
+	mpfr_ui_div(zoom, 2, zoom, MPFR_RNDN);
 
-	mpfr_div_ui(zoom, zoom, 2, MPFR_RNDN);
 	if (width >= height){
-		mpfr_div_ui(res, zoom, height, MPFR_RNDN);
 		mpfr_sub(y_min, y_min, zoom, MPFR_RNDN);
-		mpfr_mul_d(zoom, y_min, (double) -width/height, MPFR_RNDN);
+		mpfr_mul_ui(zoom, zoom, 2, MPFR_RNDN);
+		mpfr_div_ui(res, zoom, height, MPFR_RNDN);
+		mpfr_mul_d(zoom, res, width/2, MPFR_RNDN);
 		mpfr_sub(x_min, x_min, zoom, MPFR_RNDN);
 	} else {
 		mpfr_sub(x_min, x_min, zoom, MPFR_RNDN);
+		mpfr_mul_ui(zoom, zoom, 2, MPFR_RNDN);
 		mpfr_div_ui(res, zoom, width, MPFR_RNDN);
+		mpfr_mul_d(zoom, res, height/2, MPFR_RNDN);
+		mpfr_sub(y_min, y_min, zoom, MPFR_RNDN);
 	}
 	
 	
@@ -311,6 +321,23 @@ int parse (int argc, char* argv[])
 	return 0;
 }
 
+float parse_number(char * string)
+{  
+	if (strcmp(string, "phi") == 0){
+		return PHI;
+	}
+	else if (strcmp(string, "pi") == 0){
+		return PI; 
+	} 
+	else if (string[0] == 'n'){
+		string++;
+		return -1 * parse_number(string);
+		string--;
+	} 
+	else {
+		return atof(string);
+	}
+}
 
 int write_int()
 { 	
