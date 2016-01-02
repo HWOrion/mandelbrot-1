@@ -15,8 +15,8 @@ Options:
 * `--width` or `-w` specifies width of image in pixels
 * `--height` or `-h` specifies height of image in pixels
 * `--iteration` or `-d` specifies number of iterations used for calculating sets. Default is 1000
-* `-x` abscissa of imgae center 
-* `-y` ordinate of image center
+* `-x` specifies abscissa of image center 
+* `-y` specifies ordinate of image center
 * `--imaginary` specifies imaginary part of complex number C used for computing Julia set (see below)
 * `--real` specifies real part of complex number C used for computing Julia set (see below)
 * `--exponent` specifies exponent `r` used for computing multibrot or Julia set (see below)
@@ -29,6 +29,7 @@ Options:
 
 Some **Julia sets** are sets of complex numbers `c` for which the function `f(z)=cʳ+z` does not diverge when iterated. Complex number `z` is specified with `--real` an `--imaginary` comands and and real number `r` is specified wih `--exponent`.
 
+Abscissa, ordianate, exponent, imaginary and real part can be floating point numbers. For negative nubers you must type `n` instead minus sign (So, `-2.7` is typed like `n2.7`). All other numbers (width, height, iterations) are positive integer numbers. 
 
 #### compiling and running:
 Program use `gmp.h` and `mpfr.h` for arbitrary precision floating point math and `getopt.h` for parsing input, so you must have these libraries on your machine if you want to compile mandelbrot program. To compile run makefile or type following comand:
