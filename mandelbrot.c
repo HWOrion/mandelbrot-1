@@ -5,9 +5,9 @@
 #include <string.h>
 #include <getopt.h>
 
-#define PHI 1.6
-#define EULER 1.7
-#define PI 3.141692
+#define PHI   1.618033988749
+#define EULER 2.718281828459
+#define PI    3.141692653589
 
 unsigned char header [54] = {'B', 'M', 
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 54, 0x00, 0x00, 0x00, 40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 24, 0x00, 
@@ -20,7 +20,7 @@ unsigned char  	red [] = {0x00, 0xFF, 0x00},
 		blu [] = {0xFF, 0x00, 0x00};
 
 int width = 1000, height = 1000, x = 0, y = 0, i = 0, iterations = 1000, mndl = 1, mono = 1, extra;
-mpfr_t x_min, y_min, real, imag, res, x_new, y_new, x_tmp, y_tmp, zoom, exponent;
+mpfr_t x_min, y_min, real, imag, res, x_new, y_new, x_tmp, y_tmp, zoom, exponent, reduced_exponent;
 float nu = 0;
 FILE *bmp;
 
@@ -56,6 +56,8 @@ int write_row();
 
 int main (int argc, char* argv[])
 {
+	//mpfr_set_default_prec(1000);
+	//mpfr_set_emin (mpfr_get_emin_min());
 	mpfr_inits (x_min, y_min, real, imag, res, x_new, y_new, x_tmp, y_tmp, zoom, exponent, (mpfr_ptr) 0);
 	
 	parse (argc, argv);
@@ -72,7 +74,7 @@ int main (int argc, char* argv[])
 		{mandelbrot();}
 	else if (mndl == 2)
 		{multibrot();}
-	else if (mndl == 2)
+	else if (mndl == 3)
 		{julia();}
 
 	mpfr_clears(x_min, y_min, real, imag, res, x_new, y_new, x_tmp, y_tmp, zoom, exponent, (mpfr_ptr) 0);
@@ -92,9 +94,9 @@ int color_pixel (int pixel, int i, float f)
 		img [pixel+2] = red [i] + f*(red[(i+1)%3] - red[i]);
 	}
 	else if (mono == 2 && i < iterations) {
-		img [pixel]   = 0xFF;
-		img [pixel+1] = 200 - 3 * i;
-		img [pixel+2] = 255 - 4*i;
+		img [pixel+1]   = 230;
+		img [pixel] = 200 - 6 * i;
+		img [pixel+2] = 200 - 4*i;
 	}
 	else if (mono == 2 && i == iterations) {
 		img [pixel]   = 0xFF;
@@ -117,7 +119,6 @@ int color_pixel (int pixel, int i, float f)
 
 int mandelbrot ()
 {
-
 	mpfr_set(imag, y_min, MPFR_RNDN);
 	while (y < height){
 		x = 0;
@@ -139,20 +140,17 @@ int mandelbrot ()
 				mpfr_add(y_new, y_tmp, imag, MPFR_RNDN);
 				mpfr_set(x_new, x_tmp, MPFR_RNDN);
 
-				mpfr_mul(x_tmp, x_new, x_new, MPFR_RNDN);
-				mpfr_mul(y_tmp, y_new, y_new, MPFR_RNDN);
-				mpfr_add(x_tmp, x_tmp, y_tmp, MPFR_RNDN);
+				mpfr_hypot(x_tmp, x_new, y_new, MPFR_RNDN);
 				
-				if (mono != 3 && mpfr_cmp_ui(x_tmp, 2) > 0)
+				if (mono == 3 && mpfr_cmp_ui(x_tmp, 256) > 0)
 				{break;}
-				else if (mpfr_cmp_ui(x_tmp, 256) > 0)
+				else if (mpfr_cmp_ui(x_tmp, 2) > 0)
 				{break;} 
 
 				i++;
 			}
 
 			if (mono == 3 && i < iterations){
-				mpfr_hypot(x_tmp, x_new, y_new, MPFR_RNDN);
 				mpfr_log10(x_tmp, x_tmp, MPFR_RNDN);
 				mpfr_const_log2(y_tmp, MPFR_RNDN);
 				mpfr_div(x_tmp, x_tmp, y_tmp, MPFR_RNDN);
@@ -174,8 +172,66 @@ int mandelbrot ()
 	return 0;
 }
 
+
 int multibrot ()
-{return 0;}
+{
+	mpfr_set(imag, y_min, MPFR_RNDN);
+	while (y < height){
+		x = 0;
+		mpfr_set(real, x_min, MPFR_RNDN);
+
+		while (x < 3 * width){	
+			i = 0;
+			mpfr_set_flt(x_new, 0.0, MPFR_RNDN);
+			mpfr_set_flt(y_new, 0.0, MPFR_RNDN);
+
+			while (i < iterations){
+				mpfr_hypot(x_tmp, x_new, y_new, MPFR_RNDN);
+				mpfr_pow(x_tmp, x_tmp, exponent, MPFR_RNDN);
+							
+				mpfr_atan2(y_tmp, y_new, x_new, MPFR_RNDN);
+				mpfr_mul(y_tmp, y_tmp, exponent, MPFR_RNDN);
+
+				mpfr_cos(x_new, y_tmp, MPFR_RNDN);
+				mpfr_mul(x_new, x_new, x_tmp, MPFR_RNDN);
+				mpfr_add(x_new, x_new, real, MPFR_RNDN);
+
+				mpfr_sin(y_new, y_tmp, MPFR_RNDN);
+				mpfr_mul(y_new, y_new, x_tmp, MPFR_RNDN);
+				mpfr_add(y_new, y_new, imag, MPFR_RNDN);
+
+				mpfr_hypot(x_tmp, x_new, y_new, MPFR_RNDN);
+				
+				if (mono == 3 && mpfr_cmp_ui(x_tmp, 256) > 0)
+				{break;}
+				else if (mpfr_cmp_ui(x_tmp, 2) > 0)
+				{break;} 
+
+				i++;
+			}
+
+			if (mono == 3 && i < iterations){
+				mpfr_log10(x_tmp, x_tmp, MPFR_RNDN);
+				mpfr_const_log2(y_tmp, MPFR_RNDN);
+				mpfr_div(x_tmp, x_tmp, y_tmp, MPFR_RNDN);
+				mpfr_log2(x_tmp, x_tmp, MPFR_RNDN);
+				mpfr_ui_sub(x_tmp, i, x_tmp, MPFR_RNDN);
+				nu = mpfr_get_flt(x_tmp, MPFR_RNDN);
+			}
+	
+			color_pixel(x, i, nu);
+
+			x = x + 3;
+			mpfr_add(real, real, res, MPFR_RNDN);
+		}
+		write_row();
+		mpfr_add(imag, imag, res, MPFR_RNDN);
+		y++;
+	}
+	
+	return 0;
+}
+
 
 int julia ()
 {
@@ -261,8 +317,8 @@ int parse (int argc, char* argv[])
 
 			case 'e':
 				argument = parse_number(optarg);
-				if (mndl == 1 && argument != 2.0)
-					{mndl = 2;}
+				if (mndl == 2 && argument == 2.0)
+					{mndl = 1;}
 				mpfr_set_flt(exponent, argument, MPFR_RNDN);
 				break;
 
@@ -328,6 +384,9 @@ float parse_number(char * string)
 	}
 	else if (strcmp(string, "pi") == 0){
 		return PI; 
+	} 
+	else if (strcmp(string, "e") == 0){
+		return EULER; 
 	} 
 	else if (string[0] == 'n'){
 		string++;
