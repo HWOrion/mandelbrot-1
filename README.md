@@ -51,6 +51,8 @@ All examples are scaled-down anti-aliased png versions of program output. Progra
 
 ![mandelbrot set with 20 iterations](https://raw.githubusercontent.com/ubavic/mandelbrot/master/examples/mandelbrot.png)
 
+![multibrot set with 50 iterations](https://raw.githubusercontent.com/ubavic/mandelbrot/master/examples/mandelbrot2.png)
+
 #### Thank you...
 Thank you for checking my project. Please inform me of any bugs/mistakes. This project is under MIT licence.
 ```
