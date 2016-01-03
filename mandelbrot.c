@@ -2,12 +2,7 @@
 #include <mpfr.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <getopt.h>
-
-#define PHI   1.618033988749
-#define EULER 2.718281828459
-#define PI    3.141692653589
 
 unsigned char header [54] = {'B', 'M', 
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 54, 0x00, 0x00, 0x00, 40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 24, 0x00, 
@@ -19,8 +14,8 @@ unsigned char  	red [] = {0x00, 0xFF, 0x00},
 		grn [] = {0x00, 0x00, 0xFF},
 		blu [] = {0xFF, 0x00, 0x00};
 
-int width = 1000, height = 1000, x = 0, y = 0, i = 0, iterations = 1000, mndl = 1, mono = 1, extra;
-mpfr_t x_min, y_min, real, imag, res, x_new, y_new, x_tmp, y_tmp, zoom, exponent, reduced_exponent;
+int width = 1000, height = 1000, x = 0, y = 0, i = 0, iterations = 1000, mndl = 1, profile = 1, extra;
+mpfr_t x_min, y_min, real, imag, res, x_new, y_new, x_tmp, y_tmp, zoom, exponent;
 float nu = 0;
 FILE *bmp;
 
@@ -28,9 +23,10 @@ static struct option long_options[] ={
 	{"mandelbrot",   no_argument, &mndl, 1},
 	{"multibrot",    no_argument, &mndl, 2},
 	{"julia",        no_argument, &mndl, 3},
-	{"monochrome",   no_argument, &mono, 1},
-	{"bicolor",      no_argument, &mono, 2},
-	{"continous",    no_argument, &mono, 3},
+	{"ship",       	 no_argument, &mndl, 4},
+	{"monochrome",   no_argument, &profile, 1},
+	{"bicolor",      no_argument, &profile, 2},
+	{"continous",    no_argument, &profile, 3},
 	{"width",        required_argument, 0, 'w'},
 	{"height",       required_argument, 0, 'h'},
 	{"iteration",    required_argument, 0, 'd'},
@@ -45,10 +41,15 @@ static struct option long_options[] ={
 };
 
 
-int color_pixel (int pixel, int i, float f);
+void (*color_pixel)(int, int);
+
+void color_pixel_monochrome (int pixel, int i);
+void color_pixel_bicolor (int pixel, int i);
+void color_pixel_continous (int pixel, int i);
 int mandelbrot ();
 int multibrot ();
 int julia ();
+int ship ();
 int parse (int argc, char* argv[]);
 float parse_number(char * string);
 int write_int();
@@ -69,13 +70,22 @@ int main (int argc, char* argv[])
 	printf("Calculating set...\n");
 	
 	write_int();
-
+	
+	if (profile == 1)
+		{color_pixel = &color_pixel_monochrome;}
+	else if (profile == 2)
+		{color_pixel = &color_pixel_bicolor;}
+	else if (profile == 3)
+		{color_pixel = &color_pixel_continous;}
+	
 	if (mndl == 1)
 		{mandelbrot();}
 	else if (mndl == 2)
 		{multibrot();}
 	else if (mndl == 3)
 		{julia();}
+	else if (mndl == 4)
+		{ship();}
 
 	mpfr_clears(x_min, y_min, real, imag, res, x_new, y_new, x_tmp, y_tmp, zoom, exponent, (mpfr_ptr) 0);
 	free(img);
@@ -85,25 +95,9 @@ int main (int argc, char* argv[])
 	return 0;
 }
 
-int color_pixel (int pixel, int i, float f)
+void color_pixel_monochrome (int pixel, int i)
 {
-	if (mono == 3 && i < iterations) {
-		i = i%3;
-		img [pixel]   = blu [i] + f*(blu[(i+1)%3] - blu[i]);
-		img [pixel+1] = grn [i] + f*(grn[(i+1)%3] - grn[i]);
-		img [pixel+2] = red [i] + f*(red[(i+1)%3] - red[i]);
-	}
-	else if (mono == 2 && i < iterations) {
-		img [pixel+1]   = 230;
-		img [pixel] = 200 - 6 * i;
-		img [pixel+2] = 200 - 4*i;
-	}
-	else if (mono == 2 && i == iterations) {
-		img [pixel]   = 0xFF;
-		img [pixel+1] = 0xFF;
-		img [pixel+2] = 0xFF;
-	}
-	else if (i == iterations){
+	if (i == iterations){
 		img[pixel]   = 0x00;
 		img[pixel+1] = 0x00;
 		img[pixel+2] = 0x00;
@@ -113,8 +107,36 @@ int color_pixel (int pixel, int i, float f)
 		img[pixel+1] = 0xFF;
 		img[pixel+2] = 0xFF;
 	}
+}
 
-	return 0;
+
+void color_pixel_bicolor (int pixel, int i)
+{
+	if (i < iterations) {
+		img [pixel]   = 250;
+		img [pixel+1] = 200 - 2*i;
+		img [pixel+2] = 200 - 4*i;
+	}
+	else {
+		img [pixel]   = 0xE0;
+		img [pixel+1] = 0xFF;
+		img [pixel+2] = 0xFF;
+	}
+}
+
+void color_pixel_continous (int pixel, int i)
+{
+	if (i < iterations){
+		i = i%3;
+		img [pixel]   = blu [i] + nu*(blu[(i+1)%3] - blu[i]);
+		img [pixel+1] = grn [i] + nu*(grn[(i+1)%3] - grn[i]);
+		img [pixel+2] = red [i] + nu*(red[(i+1)%3] - red[i]);
+	}
+	else{
+		img[pixel]   = 0x00;
+		img[pixel+1] = 0x00;
+		img[pixel+2] = 0x00;
+	}
 }
 
 int mandelbrot ()
@@ -142,7 +164,7 @@ int mandelbrot ()
 
 				mpfr_hypot(x_tmp, x_new, y_new, MPFR_RNDN);
 				
-				if (mono == 3 && mpfr_cmp_ui(x_tmp, 256) > 0)
+				if (profile == 3 && mpfr_cmp_ui(x_tmp, 256) > 0)
 				{break;}
 				else if (mpfr_cmp_ui(x_tmp, 2) > 0)
 				{break;} 
@@ -150,7 +172,8 @@ int mandelbrot ()
 				i++;
 			}
 
-			if (mono == 3 && i < iterations){
+	
+			if (profile == 3 && i < iterations){
 				mpfr_log10(x_tmp, x_tmp, MPFR_RNDN);
 				mpfr_const_log2(y_tmp, MPFR_RNDN);
 				mpfr_div(x_tmp, x_tmp, y_tmp, MPFR_RNDN);
@@ -158,17 +181,16 @@ int mandelbrot ()
 				mpfr_ui_sub(x_tmp, i, x_tmp, MPFR_RNDN);
 				nu = mpfr_get_flt(x_tmp, MPFR_RNDN);
 			}
-	
-			color_pixel(x, i, nu);
 
+			color_pixel(x, i);
+	
 			x = x + 3;
 			mpfr_add(real, real, res, MPFR_RNDN);
 		}
 		write_row();
-		mpfr_add(imag, imag, res, MPFR_RNDN);
+		mpfr_sub(imag, imag, res, MPFR_RNDN);
 		y++;
 	}
-
 	return 0;
 }
 
@@ -202,7 +224,7 @@ int multibrot ()
 
 				mpfr_hypot(x_tmp, x_new, y_new, MPFR_RNDN);
 				
-				if (mono == 3 && mpfr_cmp_ui(x_tmp, 256) > 0)
+				if (profile == 3 && mpfr_cmp_ui(x_tmp, 256) > 0)
 				{break;}
 				else if (mpfr_cmp_ui(x_tmp, 2) > 0)
 				{break;} 
@@ -210,7 +232,7 @@ int multibrot ()
 				i++;
 			}
 
-			if (mono == 3 && i < iterations){
+			if (profile == 3 && i < iterations){
 				mpfr_log10(x_tmp, x_tmp, MPFR_RNDN);
 				mpfr_const_log2(y_tmp, MPFR_RNDN);
 				mpfr_div(x_tmp, x_tmp, y_tmp, MPFR_RNDN);
@@ -219,7 +241,73 @@ int multibrot ()
 				nu = mpfr_get_flt(x_tmp, MPFR_RNDN);
 			}
 	
-			color_pixel(x, i, nu);
+			color_pixel(x, i);
+
+			x = x + 3;
+			mpfr_add(real, real, res, MPFR_RNDN);
+		}
+		write_row();
+		mpfr_sub(imag, imag, res, MPFR_RNDN);
+		y++;
+	}
+	
+	return 0;
+}
+
+int julia ()
+{
+	
+	mpfr_t c_real, c_imag;
+	mpfr_inits (c_real, c_imag, (mpfr_ptr) 0);
+	
+	mpfr_set(c_real, real, MPFR_RNDN);
+	mpfr_set(c_imag, imag, MPFR_RNDN);
+	
+	mpfr_set(imag, y_min, MPFR_RNDN);
+	while (y < height){
+		x = 0;
+		mpfr_set(real, x_min, MPFR_RNDN);
+
+		while (x < 3 * width){	
+			i = 0;
+			mpfr_set(x_new, real, MPFR_RNDN);
+			mpfr_set(y_new, imag, MPFR_RNDN);
+
+			while (i < iterations){
+				mpfr_hypot(x_tmp, x_new, y_new, MPFR_RNDN);
+				mpfr_pow(x_tmp, x_tmp, exponent, MPFR_RNDN);
+							
+				mpfr_atan2(y_tmp, y_new, x_new, MPFR_RNDN);
+				mpfr_mul(y_tmp, y_tmp, exponent, MPFR_RNDN);
+
+				mpfr_cos(x_new, y_tmp, MPFR_RNDN);
+				mpfr_mul(x_new, x_new, x_tmp, MPFR_RNDN);
+				mpfr_add(x_new, x_new, c_real, MPFR_RNDN);
+
+				mpfr_sin(y_new, y_tmp, MPFR_RNDN);
+				mpfr_mul(y_new, y_new, x_tmp, MPFR_RNDN);
+				mpfr_add(y_new, y_new, c_imag, MPFR_RNDN);
+
+				mpfr_hypot(x_tmp, x_new, y_new, MPFR_RNDN);
+				
+				if (profile == 3 && mpfr_cmp_ui(x_tmp, 256) > 0)
+				{break;}
+				else if (mpfr_cmp_ui(x_tmp, 2) > 0)
+				{break;} 
+
+				i++;
+			}
+
+			if (profile == 3 && i < iterations){
+				mpfr_log10(x_tmp, x_tmp, MPFR_RNDN);
+				mpfr_const_log2(y_tmp, MPFR_RNDN);
+				mpfr_div(x_tmp, x_tmp, y_tmp, MPFR_RNDN);
+				mpfr_log2(x_tmp, x_tmp, MPFR_RNDN);
+				mpfr_ui_sub(x_tmp, i, x_tmp, MPFR_RNDN);
+				nu = mpfr_get_flt(x_tmp, MPFR_RNDN);
+			}
+	
+			color_pixel(x, i);
 
 			x = x + 3;
 			mpfr_add(real, real, res, MPFR_RNDN);
@@ -229,14 +317,67 @@ int multibrot ()
 		y++;
 	}
 	
+	mpfr_clears (c_real, c_imag);
 	return 0;
 }
 
-
-int julia ()
+int ship ()
 {
+	mpfr_set(imag, y_min, MPFR_RNDN);
+	while (y < height){
+		x = 0;
+		mpfr_set(real, x_min, MPFR_RNDN);
+
+		while (x < 3 * width){	
+			i = 0;
+			mpfr_set_flt(x_new, 0.0, MPFR_RNDN);
+			mpfr_set_flt(y_new, 0.0, MPFR_RNDN);
+
+			while (i < iterations){
+				mpfr_abs(x_new, x_new, MPFR_RNDN);
+				mpfr_abs(y_new, y_new, MPFR_RNDN);
+				mpfr_mul(x_tmp, x_new, x_new, MPFR_RNDN);
+				mpfr_mul(y_tmp, y_new, y_new, MPFR_RNDN);
+				mpfr_sub(x_tmp, x_tmp, y_tmp, MPFR_RNDN);
+				mpfr_add(x_tmp, x_tmp, real, MPFR_RNDN);
+				
+				mpfr_mul(y_tmp, x_new, y_new, MPFR_RNDN);
+				mpfr_mul_ui(y_tmp, y_tmp, 2, MPFR_RNDN);
+				mpfr_add(y_new, y_tmp, imag, MPFR_RNDN);
+				mpfr_set(x_new, x_tmp, MPFR_RNDN);
+
+				mpfr_hypot(x_tmp, x_new, y_new, MPFR_RNDN);
+				
+				if (profile == 3 && mpfr_cmp_ui(x_tmp, 256) > 0)
+				{break;}
+				else if (mpfr_cmp_ui(x_tmp, 2) > 0)
+				{break;} 
+
+				i++;
+			}
+
+			if (profile == 3 && i < iterations){
+				mpfr_log10(x_tmp, x_tmp, MPFR_RNDN);
+				mpfr_const_log2(y_tmp, MPFR_RNDN);
+				mpfr_div(x_tmp, x_tmp, y_tmp, MPFR_RNDN);
+				mpfr_log2(x_tmp, x_tmp, MPFR_RNDN);
+				mpfr_ui_sub(x_tmp, i, x_tmp, MPFR_RNDN);
+				nu = mpfr_get_flt(x_tmp, MPFR_RNDN);
+			}
+	
+			color_pixel(x, i);
+
+			x = x + 3;
+			mpfr_add(real, real, res, MPFR_RNDN);
+		}
+		write_row();
+		mpfr_sub(imag, imag, res, MPFR_RNDN);
+		y++;
+	}
+	
 	return 0;
 }
+
 
 int parse (int argc, char* argv[])
 { 
@@ -345,9 +486,12 @@ int parse (int argc, char* argv[])
 		printf("Calculating Multibrot set with following settings:\n");
 		mpfr_printf("exponent=%Rf, ", exponent);
 	}
-	else{
+	else if (mndl == 3){
 		printf("Calculating Julia set with following settings:\n");
 		mpfr_printf("R(c)=%Rf I(c)=%Rf exponent=%Rf, ", real, imag, exponent);
+	}
+	else if (mndl == 4){
+		printf("Calculating burning ship fractal, ");
 	}
 
 	mpfr_printf("at x = %Rf y = %Rf (zoom: %Rf), ", x_min, y_min, zoom);
@@ -356,7 +500,7 @@ int parse (int argc, char* argv[])
 	mpfr_ui_div(zoom, 2, zoom, MPFR_RNDN);
 
 	if (width >= height){
-		mpfr_sub(y_min, y_min, zoom, MPFR_RNDN);
+		mpfr_add(y_min, y_min, zoom, MPFR_RNDN);
 		mpfr_mul_ui(zoom, zoom, 2, MPFR_RNDN);
 		mpfr_div_ui(res, zoom, height, MPFR_RNDN);
 		mpfr_mul_d(zoom, res, width/2, MPFR_RNDN);
@@ -366,29 +510,20 @@ int parse (int argc, char* argv[])
 		mpfr_mul_ui(zoom, zoom, 2, MPFR_RNDN);
 		mpfr_div_ui(res, zoom, width, MPFR_RNDN);
 		mpfr_mul_d(zoom, res, height/2, MPFR_RNDN);
-		mpfr_sub(y_min, y_min, zoom, MPFR_RNDN);
+		mpfr_add(y_min, y_min, zoom, MPFR_RNDN);
 	}
 	
 	
 	mpfr_printf("at x_min = %Rf y_min = %Rf \n", x_min, y_min);
-	mpfr_printf("Resolution %.12Rf\n", res);
-	printf("Monochrome: %d\n", mono);
+	mpfr_printf("Resolution: %.12Rf per pixel. \n", res);
+	printf("Color profile: %d\n", profile);
 
 	return 0;
 }
 
 float parse_number(char * string)
 {  
-	if (strcmp(string, "phi") == 0){
-		return PHI;
-	}
-	else if (strcmp(string, "pi") == 0){
-		return PI; 
-	} 
-	else if (strcmp(string, "e") == 0){
-		return EULER; 
-	} 
-	else if (string[0] == 'n'){
+	if (string[0] == 'n'){
 		string++;
 		return -1 * parse_number(string);
 		string--;
