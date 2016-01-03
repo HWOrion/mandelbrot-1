@@ -54,6 +54,8 @@ All examples are scaled-down anti-aliased png versions of program output. Progra
 
 ![burning ship 100 iterations](https://raw.githubusercontent.com/ubavic/mandelbrot/master/examples/mandelbrot3.png)
 
+![number of iterations](https://raw.githubusercontent.com/ubavic/mandelbrot/master/examples/iteration.gif)
+
 #### Thank you...
 Thank you for checking my project. Please inform me of any bugs/mistakes. This project is under MIT licence.
 ```
