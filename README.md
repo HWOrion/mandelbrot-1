@@ -54,17 +54,19 @@ Mandelbrot set computed with 20 iterations:
 
 
 Mulribrot set computed with 20 iterations:
-<p align="center"> 
 ![multibrot set with 50 iterations](https://raw.githubusercontent.com/ubavic/mandelbrot/master/examples/mandelbrot2.png)
-</p>
 
 
 Burning ship computed with 100 itearations:
 ![burning ship 100 iterations](https://raw.githubusercontent.com/ubavic/mandelbrot/master/examples/mandelbrot3.png)
 
 
+Detail of Mandelbrot set (with `--monochorme` flag):
+![mandelbrot detail](https://raw.githubusercontent.com/ubavic/mandelbrot/master/examples/mandelbrot4.png)
+
+
 Changes in output image depends on iterations (from 1 to 100):
-<p align="center">![number of iterations](https://raw.githubusercontent.com/ubavic/mandelbrot/master/examples/mandelbrot1.gif)</p>
+![number of iterations](https://raw.githubusercontent.com/ubavic/mandelbrot/master/examples/mandelbrot1.gif)
 
 #### Thank you...
 Thank you for checking my project. Please inform me of any bugs/mistakes. This project is under MIT licence.
