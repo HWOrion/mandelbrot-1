@@ -54,7 +54,9 @@ Mandelbrot set computed with 20 iterations:
 
 
 Mulribrot set computed with 20 iterations:
-<p align="center">![multibrot set with 50 iterations](https://raw.githubusercontent.com/ubavic/mandelbrot/master/examples/mandelbrot2.png)</p>
+<p align="center"> 
+![multibrot set with 50 iterations](https://raw.githubusercontent.com/ubavic/mandelbrot/master/examples/mandelbrot2.png)
+</p>
 
 
 Burning ship computed with 100 itearations:
@@ -69,5 +71,4 @@ Thank you for checking my project. Please inform me of any bugs/mistakes. This p
 ```
 Q: What is Benoit B. Mandelbrot's middle name?
 A: Benoit B. Mandelbrot.
-`
-``
+```
