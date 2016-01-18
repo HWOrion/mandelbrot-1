@@ -9,6 +9,7 @@ Options:
 * `--mandelbrot` (default) program calculates mandelbrot set
 * `--multibrot` program calculates multibrot set
 * `--julia` program calculates Julia set
+* `--ship`program calculates burning ship fractal
 * `--monochrome` (default) output image will be black and white (fastest rendering)
 * `--bicolor` output image will be in shades of two colors (pink and blue)
 * `--continous` program will use continous coloring (slowest rendering)
@@ -65,7 +66,11 @@ Detail of Mandelbrot set (with `--monochorme` flag):
 ![mandelbrot detail](https://raw.githubusercontent.com/ubavic/mandelbrot/master/examples/mandelbrot4.png)
 
 
-Changes in output image depends on iterations (from 1 to 100):
+Changes in output image depends on number of iterations (from 1 to 100):
+![number of iterations](https://raw.githubusercontent.com/ubavic/mandelbrot/master/examples/mandelbrot1.gif)
+
+
+Multibrot sets (`r` from 1 to 15):
 ![number of iterations](https://raw.githubusercontent.com/ubavic/mandelbrot/master/examples/mandelbrot1.gif)
 
 #### Thank you...
