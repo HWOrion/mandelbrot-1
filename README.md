@@ -71,7 +71,7 @@ Changes in output image depends on number of iterations (from 1 to 100):
 
 
 Multibrot sets (`r` from 1 to 15):
-![number of iterations](https://raw.githubusercontent.com/ubavic/mandelbrot/master/examples/mandelbrot1.gif)
+![number of iterations](https://raw.githubusercontent.com/ubavic/mandelbrot/master/examples/mandelbrot2.gif)
 
 #### Thank you...
 Thank you for checking my project. Please inform me of any bugs/mistakes. This project is under MIT licence.
