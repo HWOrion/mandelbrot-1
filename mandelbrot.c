@@ -4,6 +4,11 @@
 #include <stdlib.h>
 #include <getopt.h>
 
+#define NRM  "\x1B[0m" 
+#define RED  "\x1B[31m" 
+#define GRN  "\x1B[32m" 
+#define BLU  "\x1B[34m" 
+
 unsigned char header [54] = {'B', 'M', 
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 54, 0x00, 0x00, 0x00, 40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 24, 0x00, 
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x13, 0x0B, 0x00, 0x00, 0x13, 0x0B, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -15,7 +20,7 @@ unsigned char  	red [] = {0x00, 0xFF, 0x00},
 		blu [] = {0xFF, 0x00, 0x00};
 
 int width = 1000, height = 1000, x = 0, y = 0, i = 0, iterations = 1000, mndl = 1, profile = 1, extra;
-mpfr_t x_min, y_min, real, imag, res, x_new, y_new, x_tmp, y_tmp, zoom, exponent;
+mpfr_t x_min, y_min, real, imag, res, x_new, y_new, x_tmp, y_tmp, zoom, exponent, c_real, c_imag;
 float nu = 0;
 FILE *bmp;
 
@@ -59,12 +64,12 @@ int main (int argc, char* argv[])
 {
 	//mpfr_set_default_prec(1000);
 	//mpfr_set_emin (mpfr_get_emin_min());
-	mpfr_inits (x_min, y_min, real, imag, res, x_new, y_new, x_tmp, y_tmp, zoom, exponent, (mpfr_ptr) 0);
+	mpfr_inits (x_min, y_min, real, imag, res, x_new, y_new, x_tmp, y_tmp, zoom, exponent, c_real, c_imag, (mpfr_ptr) 0);
 	
 	parse (argc, argv);
 
        	img = (unsigned char*)malloc(3 * width);
-	if (img == NULL){printf("Memory error!"); return 0;}
+	if (img == NULL){printf(RED"[!]"NRM"Memory error!\n"NRM); return 0;}
 	while (i < 3 * width){img[i] = 0xFF; i++;}
 
 	printf("Calculating set...\n");
@@ -87,11 +92,11 @@ int main (int argc, char* argv[])
 	else if (mndl == 4)
 		{ship();}
 
-	mpfr_clears(x_min, y_min, real, imag, res, x_new, y_new, x_tmp, y_tmp, zoom, exponent, (mpfr_ptr) 0);
+	mpfr_clears(x_min, y_min, real, imag, res, x_new, y_new, x_tmp, y_tmp, zoom, exponent, c_real, c_imag, (mpfr_ptr) 0);
 	free(img);
 	fclose(bmp);
 
-	printf("Done! Bye!\n\n");
+	printf(GRN"Done!"NRM"\nBye!\n\n"NRM);
 	return 0;
 }
 
@@ -113,12 +118,12 @@ void color_pixel_monochrome (int pixel, int i)
 void color_pixel_bicolor (int pixel, int i)
 {
 	if (i < iterations) {
-		img [pixel]   = 250;
+		img [pixel  ] = 250;
 		img [pixel+1] = 200 - 2*i;
 		img [pixel+2] = 200 - 4*i;
 	}
 	else {
-		img [pixel]   = 0xE0;
+		img [pixel  ] = 0xE0;
 		img [pixel+1] = 0xFF;
 		img [pixel+2] = 0xFF;
 	}
@@ -188,7 +193,7 @@ int mandelbrot ()
 			mpfr_add(real, real, res, MPFR_RNDN);
 		}
 		write_row();
-		mpfr_sub(imag, imag, res, MPFR_RNDN);
+		mpfr_add(imag, imag, res, MPFR_RNDN);
 		y++;
 	}
 	return 0;
@@ -247,7 +252,7 @@ int multibrot ()
 			mpfr_add(real, real, res, MPFR_RNDN);
 		}
 		write_row();
-		mpfr_sub(imag, imag, res, MPFR_RNDN);
+		mpfr_add(imag, imag, res, MPFR_RNDN);
 		y++;
 	}
 	
@@ -257,12 +262,6 @@ int multibrot ()
 int julia ()
 {
 	
-	mpfr_t c_real, c_imag;
-	mpfr_inits (c_real, c_imag, (mpfr_ptr) 0);
-	
-	mpfr_set(c_real, real, MPFR_RNDN);
-	mpfr_set(c_imag, imag, MPFR_RNDN);
-	
 	mpfr_set(imag, y_min, MPFR_RNDN);
 	while (y < height){
 		x = 0;
@@ -270,10 +269,12 @@ int julia ()
 
 		while (x < 3 * width){	
 			i = 0;
+
 			mpfr_set(x_new, real, MPFR_RNDN);
 			mpfr_set(y_new, imag, MPFR_RNDN);
 
 			while (i < iterations){
+				///*
 				mpfr_hypot(x_tmp, x_new, y_new, MPFR_RNDN);
 				mpfr_pow(x_tmp, x_tmp, exponent, MPFR_RNDN);
 							
@@ -306,7 +307,7 @@ int julia ()
 				mpfr_ui_sub(x_tmp, i, x_tmp, MPFR_RNDN);
 				nu = mpfr_get_flt(x_tmp, MPFR_RNDN);
 			}
-	
+
 			color_pixel(x, i);
 
 			x = x + 3;
@@ -317,7 +318,6 @@ int julia ()
 		y++;
 	}
 	
-	mpfr_clears (c_real, c_imag);
 	return 0;
 }
 
@@ -371,7 +371,7 @@ int ship ()
 			mpfr_add(real, real, res, MPFR_RNDN);
 		}
 		write_row();
-		mpfr_sub(imag, imag, res, MPFR_RNDN);
+		mpfr_add(imag, imag, res, MPFR_RNDN);
 		y++;
 	}
 	
@@ -410,7 +410,7 @@ int parse (int argc, char* argv[])
 			case 'w':
 				width = atoi(optarg);
 				if (width < 200 || width > 5000){
-					printf("Width must be between 200 and 5000 px.\nUsing default vaule.\n");
+					printf(RED"[!]"NRM"Width must be between 200 and 5000 px. Using default vaule (1000).\n");
 					width = 1000;
 				}
 				break;
@@ -418,7 +418,7 @@ int parse (int argc, char* argv[])
 			case 'h':
 				height = atoi(optarg);
 				if (height < 200 || height > 5000){
-					printf("Height must be between 200 and 5000 px.\nUsing default value.\n");
+					printf(RED"[!]"NRM"Height must be between 200 and 5000 px. Using default value (1000).\n");
 					height = 1000;
 				}
 				break;
@@ -426,23 +426,26 @@ int parse (int argc, char* argv[])
 			case 'd':
 				iterations = atoi(optarg);
 				if (iterations < 1 || iterations > 5000){
-					printf("Number of iterations must be between 1 and 5000.\nUsing default value.\n");
+					printf(RED"[!]"NRM"Number of iterations must be between 1 and 5000. Using default value (1000).\n");
 					iterations = 1000;
 				}
 				break;
 		      
 			case 'i':
 				argument = parse_number(optarg);
-				mpfr_set_flt(imag, argument, MPFR_RNDN);
+				mpfr_set_flt(c_imag, argument, MPFR_RNDN);
 				break;
 					  						  
 			case 'r':
 				argument = parse_number(optarg);
-				mpfr_set_flt(real, argument, MPFR_RNDN);
+				mpfr_set_flt(c_real, argument, MPFR_RNDN);
 				break;
 
 			case 'z':
 				argument = atof(optarg);
+				if (argument < 0)
+					{printf(RED"[!]"NRM"Zoom must be bigger then 0. Using default value (1).\n");
+					argument = 1;}
 				mpfr_set_flt(zoom, argument, MPFR_RNDN);
 				break;
 
@@ -473,7 +476,7 @@ int parse (int argc, char* argv[])
 	}
   
 	if (optind < argc){
-		printf ("Invalid options: ");
+		printf (RED"[!]"NRM"Invalid options: ");
 		while (optind < argc)
 			printf ("%s ", argv[optind++]);
 		printf("Type mandelbrot --help for usage.\n");
@@ -488,7 +491,7 @@ int parse (int argc, char* argv[])
 	}
 	else if (mndl == 3){
 		printf("Calculating Julia set with following settings:\n");
-		mpfr_printf("R(c)=%Rf I(c)=%Rf exponent=%Rf, ", real, imag, exponent);
+		mpfr_printf("R(c)=%Rf I(c)=%Rf exponent=%Rf, ", c_real, c_imag, exponent);
 	}
 	else if (mndl == 4){
 		printf("Calculating burning ship fractal, ");
@@ -500,7 +503,7 @@ int parse (int argc, char* argv[])
 	mpfr_ui_div(zoom, 2, zoom, MPFR_RNDN);
 
 	if (width >= height){
-		mpfr_add(y_min, y_min, zoom, MPFR_RNDN);
+		mpfr_sub(y_min, y_min, zoom, MPFR_RNDN);
 		mpfr_mul_ui(zoom, zoom, 2, MPFR_RNDN);
 		mpfr_div_ui(res, zoom, height, MPFR_RNDN);
 		mpfr_mul_d(zoom, res, width/2, MPFR_RNDN);
@@ -510,7 +513,7 @@ int parse (int argc, char* argv[])
 		mpfr_mul_ui(zoom, zoom, 2, MPFR_RNDN);
 		mpfr_div_ui(res, zoom, width, MPFR_RNDN);
 		mpfr_mul_d(zoom, res, height/2, MPFR_RNDN);
-		mpfr_add(y_min, y_min, zoom, MPFR_RNDN);
+		mpfr_sub(y_min, y_min, zoom, MPFR_RNDN);
 	}
 	
 	
@@ -523,14 +526,7 @@ int parse (int argc, char* argv[])
 
 float parse_number(char * string)
 {  
-	if (string[0] == 'n'){
-		string++;
-		return -1 * parse_number(string);
-		string--;
-	} 
-	else {
 		return atof(string);
-	}
 }
 
 int write_int()
