@@ -457,7 +457,7 @@ int parse (int argc, char* argv[])
 			case 'y':
 				argument = parse_number(optarg);
 				mpfr_set_flt(y_min, argument, MPFR_RNDN);
-				break;
+					break;
 
 			case 'e':
 				argument = parse_number(optarg);
@@ -467,7 +467,7 @@ int parse (int argc, char* argv[])
 				break;
 
 			case 'u':
-				printf("Usage\n");
+				printf("\nUsage: ./mandelbrot " RED "[OPTIONS]\n--mandelbrot" NRM " (default) program calculates mandelbrot set\n" RED "--multibrot" NRM " program calculates multibrot set \n" RED "--julia" NRM " program calculates Julia set \n" RED "--ship" NRM " program calculates burning ship fractal \n" RED "--monochrome" NRM " (default) output image will be black and white (fastest rendering) \n" RED "--bicolor" NRM " output image will be in shades of two colors (pink and blue) \n" RED "--continous" NRM " program will use continous coloring (slowest rendering) \n" RED "--width"NRM" or "RED"-w"NRM" specifies width of image in pixels \n" RED "--height" NRM " or " RED "-h" NRM " specifies height of image in pixels \n" RED "--iteration" NRM " or " RED "-d" NRM " specifies number of iterations used for calculating sets. Default value is 1000 \n" RED " -x" NRM " specifies abscissa of image center Default value is 0.0 \n" RED " -y" NRM " specifies ordinate of image center. Default value is 0.0 \n" RED "--zoom" NRM " or " RED "-z" NRM " specifies zoom factor. Default value is 1.0 \n" RED "--imaginary" NRM "  or " RED " -i " NRM " specifies imaginary part of complex number C used for computing Julia set\n" RED "--real" NRM " or " RED "-r" NRM " specifies real part of complex number C used for computing Julia set\n" RED "--exponent" NRM " or " RED "-e" NRM " specifies exponent r used for computing multibrot or Julia set\n" RED "--help" NRM " print this message \n\n");
 				break;
 											    
 			default:
@@ -483,22 +483,20 @@ int parse (int argc, char* argv[])
 	}
 	
 	if (mndl == 1){
-		printf("Calculating Mandelbrot set, ");
+		printf("Calculating Mandelbrot set ");
 	}
 	else if (mndl == 2){
-		printf("Calculating Multibrot set with following settings:\n");
-		mpfr_printf("exponent=%Rf, ", exponent);
+		mpfr_printf("Calculating Multibrot set, with exponent=%Rf, ", exponent);
 	}
 	else if (mndl == 3){
-		printf("Calculating Julia set with following settings:\n");
-		mpfr_printf("R(c)=%Rf I(c)=%Rf exponent=%Rf, ", c_real, c_imag, exponent);
+		mpfr_printf("Calculating Julia set, with c = %Rf + %Rfi and exponent=%Rf, ", c_real, c_imag, exponent);
 	}
 	else if (mndl == 4){
 		printf("Calculating burning ship fractal, ");
 	}
 
-	mpfr_printf("at x = %Rf y = %Rf (zoom: %Rf), ", x_min, y_min, zoom);
-        printf("on %dpx X %dpx image with %d iterations.\n", width, height, iterations);
+	mpfr_printf("centered at %Rf + %Rfi and with %Rf zoom factor.\n", x_min, y_min, zoom);
+        printf("Image dimensios are %dpx by %dpx. Set is calculated with with max %d iterations per point, and rendered with clolor profile No. %d.\n", width, height, iterations, profile);
 
 	mpfr_ui_div(zoom, 2, zoom, MPFR_RNDN);
 
@@ -517,9 +515,8 @@ int parse (int argc, char* argv[])
 	}
 	
 	
-	mpfr_printf("at x_min = %Rf y_min = %Rf \n", x_min, y_min);
-	mpfr_printf("Resolution: %.12Rf per pixel. \n", res);
-	printf("Color profile: %d\n", profile);
+	//mpfr_printf("at x_min = %Rf y_min = %Rf \n", x_min, y_min);
+	//mpfr_printf("Resolution: %.12Rf per pixel. \n", res);
 
 	return 0;
 }
