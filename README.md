@@ -1,5 +1,5 @@
 # mandelbrot
-Mandelbrot, multibrot, Julia set and burning ship set generator written in C, with arbitrary precision floating point support. Program output is 24-bit uncompressed BMP image. Usage: 
+Mandelbrot, multibrot, Julia set and burning ship set generator written in C, with arbitrary precision floating point support. Program output is 24-bit uncompressed BMP image. Usage:
 ```
 ./mandelbrot [OPTION]
 ```
@@ -12,7 +12,7 @@ Options:
 * `--ship`program calculates burning ship fractal
 * `--monochrome` (default) output image will be black and white (fastest rendering)
 * `--bicolor` output image will be in shades of two colors (pink and blue)
-* `--continous` program will use continous coloring (slowest rendering)
+* `--continuous` program will use continuous coloring (slowest rendering)
 * `--width` or `-w` specifies width of image in pixels
 * `--height` or `-h` specifies height of image in pixels
 * `--iteration` or `-d` specifies number of iterations used for calculating sets. Default value is `1000`
@@ -27,28 +27,28 @@ Options:
 
 **Mandelbrot set** is the set of complex numbers `c` for which the function `f(z)=z²+c` does not diverge when iterated (`z₀ = 0`).
 
-**Multibrot set** is the set of complex numbers `c` for which the function `f(z)=zʳ+c` does not diverge when iterated (`z₀ = 0`). Real number `r` is specified wih  `--exponent`. 
+**Multibrot set** is the set of complex numbers `c` for which the function `f(z)=zʳ+c` does not diverge when iterated (`z₀ = 0`). Real number `r` is specified with  `--exponent`.
 
-Some **Julia sets** are sets of complex numbers `z` for which the function `f(z)=zʳ+C` does not diverge when iterated. Complex number `C` is specified with `--real` an `--imaginary` commands and and real number `r` is specified wih `--exponent`.
+Some **Julia sets** are sets of complex numbers `z` for which the function `f(z)=zʳ+C` does not diverge when iterated. Complex number `C` is specified with `--real` an `--imaginary` commands and and real number `r` is specified with `--exponent`.
 
 **Burning ship** fractal is the set of complex numbers `c` for which the function `f(z)=(|Re(z)|+i|Im(z)|)²+c` does not diverge when iterated (`z₀ = 0`).
 
-Abscissa, ordianate, exponent, zoom, imaginary and real part of `C`, are floating point numbers. All other values (width, height, iterations) are positive integer numbers. 
+Abscissa, ordinate, exponent, zoom, imaginary and real part of `C`, are floating point numbers. All other values (width, height, iterations) are positive integer numbers.
 
 #### Planed features
 * periodicty checking
-* series aproximantion
-* color themes 
+* series approximation
+* color themes
 
 #### Compiling and running:
-Program use `gmp.h` and `mpfr.h` for arbitrary precision floating point math and `getopt.h` for parsing input, so you must have these libraries on your machine if you want to compile mandelbrot program. To compile run makefile or type following comand:
+Program use `gmp.h` and `mpfr.h` for arbitrary precision floating point math and `getopt.h` for parsing input, so you must have these libraries on your machine if you want to compile mandelbrot program. To compile, run makefile or type following command:
 ```
 gcc -lgmp -lmpfr mandelbrot.c -o mandelbrot
 ```
-then run: `./mandelbrot`. Program is tested on x86_64 linux machine . 
+then run: `./mandelbrot`. Program is tested on x86_64 Linux machine .
 
 #### Examples:
-All examples are scaled-down anti-aliased png versions of program output. Program doesn't have antaliasing support.
+All examples are scaled-down anti-aliased png versions of program output. Program doesn't have antialiasing support.
 
 Mandelbrot set computed with 20 iterations:
 ![mandelbrot set with 20 iterations](https://raw.githubusercontent.com/ubavic/mandelbrot/master/examples/mandelbrot.png)
@@ -58,7 +58,7 @@ Mulribrot set computed with 20 iterations:
 ![multibrot set with 50 iterations](https://raw.githubusercontent.com/ubavic/mandelbrot/master/examples/mandelbrot2.png)
 
 
-Burning ship computed with 100 itearations:
+Burning ship computed with 100 iterations:
 ![burning ship 100 iterations](https://raw.githubusercontent.com/ubavic/mandelbrot/master/examples/mandelbrot3.png)
 
 
@@ -77,7 +77,7 @@ Multibrot sets (`r` from 1 to 15):
 
 
 #### Thank you...
-Thank you for checking my project. Please inform me of any bugs/mistakes. This project is under MIT licence.
+Thank you for checking my project. Please inform me of any bugs/mistakes. This project is under MIT license.
 ```
 Q: What is Benoit B. Mandelbrot's middle name?
 A: Benoit B. Mandelbrot.
